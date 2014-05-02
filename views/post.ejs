@@ -22,13 +22,13 @@
         <h4 class="modal-title" id="myModalLabel">upload images</h4>
       </div>
       <div class="modal-body">
-        <form role="form" method="post" action="/upload" enctype="multipart/form-data">
-		  <div class="form-group">
-		    <label for="fileInput">upload images</label>
-		    <input type="file" class="form-control" id="fileInput" placeholder="select your images" multiple="multiple" accept="image/jpeg, image/gif">
-		  </div>
-		  <button type="submit" class="btn btn-default">upload</button>
-		</form>
+        <form role="form" method="post" action="/upload" enctype="multipart/form-data" name="fileinfo">
+    		  <div class="form-group">
+    		    <label for="fileInput">upload images</label>
+    		    <input type="file" name="files" class="form-control" id="fileInput" placeholder="select your images" multiple="multiple" accept="image/jpeg, image/gif">
+    		  </div>
+    		  <button id="submitButton" type="button" class="btn btn-default">upload</button>
+    		</form>
       </div>
       <div class="modal-footer">
       	<button type="button" class="btn btn-primary" id="uploadOK">OK</button>
@@ -40,17 +40,60 @@
 <%- include footer %>
 <script>
 	$("textarea#pagedownMe").pagedownBootstrap({'sanatize': false, 'help': function(){alert(1);return false;}});
-  var paths = "";
-  $("#fileInput").change(function(){
-    var files = document.getElementById("fileInput").files;
-    
-    for(var i = 0; i < files.length; i++)
-    {
-      paths += "http://localhost:3000/images/" + files[i].name + "\n";
-    }
+
+  var time = new Date().getTime();
+  $("#submitButton").click(function(){
+      var files = document.getElementById("fileInput").files;
+      var formData = new FormData(document.forms.namedItem("fileinfo"));
+      //formData.append('files', files);
+      var names = "";
+      for(var i = 0; i < files.length; i++)
+      {
+        names += time + files[i].name + ";";
+      }
+      names = names.substring(0, names.length - 1);
+      formData.append('filesName', names);
+      var xhr;
+      if (window.ActiveXObject) {
+        xhr = new ActiveXObject("Microsoft.XMLHTTP");
+      } else if (window.XMLHttpRequest) {
+        xhr = new XMLHttpRequest();
+      }
+      xhr.open("POST", "/asyncUpload", true);
+      xhr.onload = function(event){
+          if(xhr.responseText == 1)
+          {
+            alert('success');
+          }
+          else if(xhr.responseText == 0)
+          {
+            alert('empty');
+          }
+          else
+          {
+            alert('error');
+          }
+      };
+      xhr.send(formData);
+      /*$.ajax({
+            data: 'formData=0',
+            url: '/asyncUpload',
+            type: 'POST',
+            dataType: 'JSON',
+            success: function(data){
+              alert(123);
+                if(data.success == 1)
+                {
+                  alert(1);
+                }
+                if(data.success == 0)
+                {
+                  alert(0);
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown){
+                alert('error');  
+            }
+        });*/
   });
-	$("#uploadOK").click(function(){
-		alert(paths);
-		$(".wmd-input");
-	});
 </script>

@@ -253,6 +253,36 @@ module.exports = function(app)
 		res.redirect('/upload');
 	});
 
+	app.post('/asyncUpload', checkLogin);
+	app.post('/asyncUpload', function(req, res)
+	{
+		console.log(123);
+		console.log(req.body.filesName);
+		console.log(req.files.files);
+		var filesName = req.body.filesName.split(";");
+		if(!req.files.files || req.files.files.originalFilename == "")
+		{
+			console.log('empty file!');
+			req.flash('error', '文件为空!');
+			res.json(0);
+			return;
+		}
+		if(!req.files.files.length)
+		{
+			var target_path = './public/images/uploadImgs/' + filesName[0] + req.files.files.originalFilename;
+			fs.renameSync(req.files.files.path, target_path);
+		}
+		else
+		{
+			for(var i in req.files.files)
+			{
+				var target_path = './public/images/uploadImgs/' + filesName[i] + req.files.files[i].originalFilename;
+				fs.renameSync(req.files.files[i].path, target_path);
+			}
+		}
+		res.json(1);
+	});
+
 	app.get('/search', function(req, res){
 		Post.search(req.query.keyword, function(err, posts){
 			if(err)
