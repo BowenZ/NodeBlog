@@ -17,6 +17,6 @@
 	    {
 	      names += time + files[i].name + ";";
 	    }
-	    $("#filesName").val(names.substring(0, names.length - 1));
+	    $("#filesName").val(names.substring(0, names.length - 1).replace(new RegExp(" ", "g"), "-"));
 	});
 </script>

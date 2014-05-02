@@ -10,7 +10,7 @@
 </form>
 
 <!-- Button trigger modal -->
-<button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#uploadModal" id="uploadButton">
+<button class="btn btn-primary btn-lg" style="display: none" data-toggle="modal" data-target="#uploadModal" id="uploadButton">
   Launch demo modal
 </button>
 <!-- Modal -->
@@ -27,12 +27,15 @@
     		    <label for="fileInput">upload images</label>
     		    <input type="file" name="files" class="form-control" id="fileInput" placeholder="select your images" multiple="multiple" accept="image/jpeg, image/gif">
     		  </div>
-    		  <button id="submitButton" type="button" class="btn btn-default">upload</button>
+              <div class="progress">
+                  <div class="progress-bar progress-bar-warning" id="progressBar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                  </div>
+                </div>
+    		  <button id="submitButton" type="button" class="btn btn-primary">upload</button>
     		</form>
       </div>
       <div class="modal-footer">
-      	<button type="button" class="btn btn-primary" id="uploadOK">OK</button>
-        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+      	<button type="button" class="btn btn-danger" data-dismiss="modal" id="uploadOK">Close</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
@@ -43,6 +46,7 @@
 
   var time = new Date().getTime();
   $("#submitButton").click(function(){
+    $("#progressBar").attr("style", "width: 0%").attr("aria-valuenow", "0");
       var files = document.getElementById("fileInput").files;
       var formData = new FormData(document.forms.namedItem("fileinfo"));
       //formData.append('files', files);
@@ -51,7 +55,7 @@
       {
         names += time + files[i].name + ";";
       }
-      names = names.substring(0, names.length - 1);
+      names = names.substring(0, names.length - 1).replace(new RegExp(" ", "g"), "-");
       formData.append('filesName', names);
       var xhr;
       if (window.ActiveXObject) {
@@ -63,7 +67,12 @@
       xhr.onload = function(event){
           if(xhr.responseText == 1)
           {
-            alert('success');
+            //alert('success');
+            names = names.replace(new RegExp(";","g"), ')\n\n![aaa](http://localhost:3000/images/uploadImgs/');
+            names = "\n![aaa](http://localhost:3000/images/uploadImgs/" + names;
+            names = names + ")\n\n";
+            var oldVal = $("textarea").val();
+            $("textarea").val(oldVal + names);
           }
           else if(xhr.responseText == 0)
           {
@@ -74,26 +83,19 @@
             alert('error');
           }
       };
+      xhr.upload.addEventListener("progress", progressFunction, false);
       xhr.send(formData);
-      /*$.ajax({
-            data: 'formData=0',
-            url: '/asyncUpload',
-            type: 'POST',
-            dataType: 'JSON',
-            success: function(data){
-              alert(123);
-                if(data.success == 1)
+      
+       function progressFunction(evt) {
+            var progressBar = document.getElementById("progressBar");
+            if (evt.lengthComputable) {
+                var value = Math.floor((evt.loaded / evt.total) * 100);
+                $("#progressBar").attr("style", "width: " + value + "%").attr("aria-valuenow", value);
+                if(value == 100)
                 {
-                  alert(1);
+                    $("#progressBar").removeClass("progress-bar-warning").addClass("progress-bar-success");;
                 }
-                if(data.success == 0)
-                {
-                  alert(0);
-                }
-            },
-            error: function(jqXHR, textStatus, errorThrown){
-                alert('error');  
             }
-        });*/
+        }  
   });
 </script>

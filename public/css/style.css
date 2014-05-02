@@ -109,5 +109,5 @@ article a:hover {
 
 .wmd-preview img
 {
-    width: 100%;
+    max-width: 100%;
 }

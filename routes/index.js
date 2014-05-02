@@ -95,12 +95,13 @@ module.exports = function(app)
 		});
 	});
 
-	app.get("/reg", checkNotLogin);
+	app.post("/reg", checkNotLogin);
 	app.post("/reg", function(req, res)
 	{
 		var name = req.body.name,
 			password = req.body.password,
-			password_re = req.body['password-repeat'];
+			password_re = req.body['password-repeat'],
+			rememberMe = req.body.rememberMe;
 		//validate password
 		if(password_re != password)
 		{
@@ -258,7 +259,6 @@ module.exports = function(app)
 	{
 		console.log(123);
 		console.log(req.body.filesName);
-		console.log(req.files.files);
 		var filesName = req.body.filesName.split(";");
 		if(!req.files.files || req.files.files.originalFilename == "")
 		{
@@ -269,15 +269,29 @@ module.exports = function(app)
 		}
 		if(!req.files.files.length)
 		{
-			var target_path = './public/images/uploadImgs/' + filesName[0] + req.files.files.originalFilename;
+			var target_path = './public/images/uploadImgs/' + filesName[0];
 			fs.renameSync(req.files.files.path, target_path);
 		}
 		else
 		{
 			for(var i in req.files.files)
 			{
-				var target_path = './public/images/uploadImgs/' + filesName[i] + req.files.files[i].originalFilename;
+				var target_path = './public/images/uploadImgs/' + filesName[i];
+				if(target_path.indexOf(req.files.files[i].originalFilename.replace(new RegExp(" ", "g"), "-")) < 0)
+				{
+					console.log("wrong");
+					var originalFilename = req.files.files[i].originalFilename;
+					for(var j = 0; j < filesName.length; j++)
+					{
+						if(originalFilename.replace(new RegExp(" ", "g"), "-").indexOf(filesName[j].substring(14)) > -1)
+						{
+							target_path = './public/images/uploadImgs/' + filesName[j];
+							break;
+						}
+					}
+				}
 				fs.renameSync(req.files.files[i].path, target_path);
+				console.log(filesName[i]+"-"+req.files.files[i].originalFilename);
 			}
 		}
 		res.json(1);
@@ -328,15 +342,15 @@ module.exports = function(app)
 		});
 	});
 
-	app.get('/u/:name/:day/:title', function(req, res){
-		Post.getOne(req.params.name, req.params.day, req.params.title, function(err, post){
+	app.get('/p/:_id', function(req, res){
+		Post.getOne(req.params._id, function(err, post){
 			if(err)
 			{
 				req.flash('error', err);
 				return res.redirect('/');
 			}
 			res.render('article', {
-				title: req.params.title,
+				title: post.title,
 				post: post,
 				user:req.session.user,
 				success: req.flash('success').toString(),
@@ -493,6 +507,19 @@ module.exports = function(app)
 				success: req.flash('success').toString(),
 				error: req.flash('error').toString()
 			});
+		});
+	});
+
+	app.get('/rankTags', function(req, res){
+		Post.getRank(function(err, ranks){
+			if(err)
+			{
+				req.flash('error', err);
+				return res.redirect('/');
+			}
+			console.log(ranks);
+			req.flash('success', 'success');
+			res.redirect('/tags');
 		});
 	});
 };

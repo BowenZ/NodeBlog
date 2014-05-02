@@ -1,6 +1,7 @@
 var mongodb = require('./db'),
 	markdown = require('markdown').markdown;
 var crypto = require('crypto');
+var ObjectID = require('mongodb').ObjectID;
 function Post(name, head, title, tags, post)
 {
 	this.name = name;
@@ -124,7 +125,7 @@ Post.getTen = function(name, page, callback){
 	});
 };
 
-Post.getOne = function(name, day, title, callback)
+Post.getOne = function(_id, callback)
 {
 	mongodb.open(function(err, db){
 		if(err)
@@ -138,9 +139,7 @@ Post.getOne = function(name, day, title, callback)
 				return callback(err);
 			}
 			collection.findOne({
-				"name": name,
-				"time.day": day,
-				"title": title,
+				"_id": new ObjectID(_id)
 			}, function(err, doc){
 				if(err)
 				{
@@ -152,9 +151,7 @@ Post.getOne = function(name, day, title, callback)
 					//每访问1次，pv增加1
 					console.log(collection.update);
 					collection.update({
-						"name": name,
-						"time.day": day,
-						"title": title
+						"_id": new ObjectID(_id)
 					}, {
 						$inc: {"pv": 1}
 					}, function(err){
@@ -501,6 +498,49 @@ Post.reprint = function(reprint_from, reprint_to, callback){
 					callback(err, post[0]);
 				});
 			});
+		});
+	});
+};
+
+Post.getRank = function(callback){
+	mongodb.open(function(err, db){
+		if(err)
+		{
+			console.log('error1');
+			return callback(err);
+		}
+		db.collection('posts', function(err, collection){
+			if(err)
+			{
+				console.log('error2');
+				mongodb.close();
+				return callback(err);
+			}
+			collection.group({
+		        "key": {"": false},
+		        "initial": {"tags": {}},
+		        "reduce": function(doc, prev){
+		            for(i in doc.tags){
+		                if(doc.tags[i] in prev.tags){
+		                    prev.tags[doc.tags[i]]++;
+		                }
+		                else
+		                {
+		                    prev.tags[doc.tags[i]] = 1;
+		                }
+		            }
+		        }
+		    }).toArray(function(err, docs){
+		    	console.log("called");
+		    	mongodb.close();
+		    	if(err)
+		    	{
+		    		console.log('error3');
+		    		return callback(err);
+		    	}
+		    	console.log(docs);
+		    	return(null, docs);
+		    });
 		});
 	});
 };

@@ -15,7 +15,7 @@ User.prototype.save = function(callback)
 {
 	var md5 = crypto.createHash('md5'),
 		email_MD5 = md5.update(this.email.toLowerCase()).digest('hex'),
-		head = 'http://www.gravatar.com/avatar' + email_MD5 + '?s=48';
+		head = 'http://www.gravatar.com/avatar/' + email_MD5 + '?s=48';
 	//user's file that about to save to DB
 	var user = {
 		name: this.name,
