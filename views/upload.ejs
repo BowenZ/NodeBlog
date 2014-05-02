@@ -1,0 +1,22 @@
+<%- include header %>
+
+<form method="post" action="/upload" enctype="multipart/form-data">
+	<input type="file" name="files" id="files" multiple="multiple"/><br>
+	<input type="hidden" name="filesName" id="filesName"/>
+	<input type="submit" value="upload"/>
+</form>
+
+<%- include footer %>
+
+<script>
+	var time = new Date().getTime();
+	$("#files").change(function(){
+	    var files = document.getElementById("files").files;
+	    var names = "";
+	    for(var i = 0; i < files.length; i++)
+	    {
+	      names += time + files[i].name + ";";
+	    }
+	    $("#filesName").val(names.substring(0, names.length - 1));
+	});
+</script>

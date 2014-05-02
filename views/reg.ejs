@@ -1,0 +1,116 @@
+<%- include header %>
+<!-- <form method="post">
+  用户名：  <input type="text" name="name"/><br />
+  密码：    <input type="password" name="password"/><br />
+  确认密码：<input type="password" name="password-repeat"/><br />
+  邮箱：    <input type="email" name="email"/><br />
+            <input type="submit" value="注册"/>
+</form> -->
+<form class="form-horizontal" role="form" method="post">
+  <div class="form-group">
+    <label for="inputName" class="col-sm-2 control-label">用户名</label>
+    <div class="col-sm-10">
+      <input type="text" name="name" class="form-control" id="inputName" placeholder="用户名" required="required" maxlength="15">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="inputPassword1" class="col-sm-2 control-label">密码</label>
+    <div class="col-sm-10">
+      <input type="password" name="password" class="form-control" id="inputPassword1" placeholder="密码" required="required" maxlength="20">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="inputPassword2" class="col-sm-2 control-label">确认密码</label>
+    <div class="col-sm-10">
+      <input type="password" name="password-repeat" class="form-control" id="inputPassword2" placeholder="密码" required="required" maxlength="20">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="inputEmail" class="col-sm-2 control-label">邮箱</label>
+    <div class="col-sm-10">
+      <input type="email" name="email" class="form-control" id="inputEmail" placeholder="邮箱" required="required" maxlength="30">
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+      <div class="checkbox">
+        <label>
+          <input type="checkbox"> 记住我
+        </label>
+      </div>
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+      <button type="submit" class="btn btn-default">注册</button>
+    </div>
+  </div>
+</form>
+<%- include footer %>
+<script>
+	var nameInput = $(".form-group").eq(0);
+	var emailInput = $(".form-group").eq(3);
+	$("input[name='name']").blur(function(){
+		if($(this).val() == "")
+		{
+			nameInput.removeClass("has-success");
+            nameInput.addClass("has-error");
+            return;
+		}
+		 $.ajax({
+            data: 'name=' + $(this).val(),
+            url: '/reg/checkName',
+            dataType: 'json',
+            cache: false,
+            timeout: 5000,
+            success: function(data){
+                if(data.repeat == 1)
+                {
+                	nameInput.removeClass("has-success");
+                	nameInput.addClass("has-error");
+                }
+                if(data.repeat == 0)
+                {
+                	nameInput.removeClass("has-error");
+                	nameInput.addClass("has-success");
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown){
+            	alert(2);
+                alert('error ' + textStatus + " " + errorThrown);  
+            }
+        });
+	});
+
+	$("input[name='email']").blur(function(){
+		if($(this).val() == "")
+		{
+			emailInput.removeClass("has-success");
+            emailInput.addClass("has-error");
+            return;
+		}
+		 $.ajax({
+            data: 'email=' + $(this).val(),
+            url: '/reg/checkEmail',
+            dataType: 'json',
+            cache: false,
+            timeout: 5000,
+            success: function(data){
+                if(data.repeat == 1)
+                {
+                	emailInput.removeClass("has-success");
+                	emailInput.addClass("has-error");
+                }
+                if(data.repeat == 0)
+                {
+                	emailInput.removeClass("has-error");
+                	emailInput.addClass("has-success");
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown){
+            	alert(2);
+                alert('error ' + textStatus + " " + errorThrown);  
+            }
+        });
+	});
+</script>
